@@ -1,0 +1,7 @@
+bridge-marker                    github.com/kubevirt/bridge-marker
+kubemacpool                      github.com/K8sNetworkPlumbingWG/kubemacpool
+sriov-network-device-plugin      github.com/intel/sriov-network-device-plugin
+sriov-cni                        github.com/intel/sriov-cni
+ovs-cni-marker                   github.com/kubevirt/ovs-cni
+ovs-cni-plugin                   github.com/kubevirt/ovs-cni
+cluster-network-addons-operator  github.com/kubevirt/cluster-network-addons-operator
