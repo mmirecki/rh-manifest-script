@@ -1,11 +1,10 @@
 #!/bin/bash
 
-echo "$(whoami)"
 CURRENT_DIR="$(pwd)"
 PROJECTS_FILE="$CURRENT_DIR/projects"
 BRANCH=$1
 DOWNSTREAM_USER=$2
-echo $PROJECTS_FILE
+MANIFETST_FILE=rh-manifest.txt
 
 TMP_DIR=$(mktemp -d)
 
@@ -18,25 +17,20 @@ if [ ! -f "$RETRODEP" ]; then
     if [ $(which $RETRODEP &>/dev/null; echo $?) -eq 1 ]; then
         echo "No retrodep detected, exiting"
         exit 1
-        # echo "Installing retrodep from github.com/release-engineering/retrodep"
-        # go get github.com/release-engineering/retrodep
     fi
 else
     cp $RETRODEP $TMP_DIR 
     RETRODEP="$TMP_DIR/retrodep"   
 fi
 
-# MM
-TMP_DIR="/tmp/tmp.W1fqdmCiH5"
 cd $TMP_DIR
 
 mkdir distgit
 
-
 function prepare_manifests() {
     PROJECT=$1
     US_REPO=$2
-    echo "==========\n   prepare_manifests:  $PROJECT  $REPO"
+    echo "Preparing manifest file for $PROJECT"
     cd distgit
     git clone ssh://pkgs.devel.redhat.com/containers/$PROJECT
     cd $PROJECT
@@ -47,14 +41,11 @@ function prepare_manifests() {
     DS_PROJECT=$(echo $DS_REPO | awk -F '/' '{print $5}')
     cd ../..
 
-
-    #git clone "https://github.com/kubevirt/$PROJECT.git"
-   # git clone ssh://$DOWNSTREAM_USER@code.engineering.redhat.com/$DS_REPO
     git clone $DS_REPO
     cd $DS_PROJECT
     git checkout -b retrodepbranch $DS_HASH
-    echo "RUNNING RETRODEP $(pwd)"
-    $RETRODEP -importpath $US_REPO . > ../${PROJECT}_rh-manifest.txt
+    echo "Running retrodep"
+    $RETRODEP -importpath $US_REPO . > ../${PROJECT}_$MANIFETST_FILE
     cd ..
     #rm -rf $PROJECT
     cp -r $PROJECT ${PROJECT}_bak
@@ -66,8 +57,8 @@ function update_manifests() {
     echo "=======  handle_project:  $PROJECT"
     #git clone ssh://pkgs.devel.redhat.com/containers/$PROJECT
     cd distgit/$PROJECT
-    cp ../../${PROJECT}_rh-manifest.txt rh-manifest.txt
-    git status|grep "rh-manifest.txt"
+    cp ../../${PROJECT}_$MANIFETST_FILE $MANIFETST_FILE
+    git status|grep "$MANIFETST_FILE"
     CHANGED=$?
     if [ $CHANGED -eq 0 ]
     then 
@@ -97,33 +88,7 @@ do
         return
     fi
     update_manifests $LINE
-
 done
 
-
 echo "TEMPDIR: $TMP_DIR"
-#rm -rf  $TMP_DIR
-
-
-
-
-
-
-
-
-
-#git clone ssh://mmirecki@code.engineering.redhat.com/bridge-marker
- #/home/mmirecki/go/src/github.com/release-engineering/retrodep/bin/retrodep -importpath github.com/kubevirt/bridge-marker  ./bridge-marker/  2> /dev/null |tee manifest
-#rm -rf bridge-marker
-#git clone ssh://pkgs.devel.redhat.com/containers/bridge-marker
-#cd bridge-marker/
-
-#git checkout origin/cnv-2.0-rhel-8
-
-#cp ../manifest .
-
-
-#git clone ssh://pkgs.devel.redhat.com/containers/sriov-cni
-
-
-#sriov-cni
+rm -rf  $TMP_DIR
