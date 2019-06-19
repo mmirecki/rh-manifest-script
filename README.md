@@ -23,3 +23,5 @@ kubemacpool                      github.com/K8sNetworkPlumbingWG/kubemacpool
 
 The upstream repo is needed by the retrodep tool.
 
+You need to have RH vpn enabled and be logged on to kinit
+

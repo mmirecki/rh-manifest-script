@@ -47,15 +47,11 @@ function prepare_manifests() {
     echo "Running retrodep"
     $RETRODEP -importpath $US_REPO . > ../${PROJECT}_$MANIFETST_FILE
     cd ..
-    #rm -rf $PROJECT
-    cp -r $PROJECT ${PROJECT}_bak
+    rm -rf $DS_PROJECT
 }
-
 
 function update_manifests() {
     PROJECT=$1
-    echo "=======  handle_project:  $PROJECT"
-    #git clone ssh://pkgs.devel.redhat.com/containers/$PROJECT
     cd distgit/$PROJECT
     cp ../../${PROJECT}_$MANIFETST_FILE $MANIFETST_FILE
     git status|grep "$MANIFETST_FILE"
@@ -64,7 +60,8 @@ function update_manifests() {
     then 
         git add rh-manifest.txt
         git commit -m "Update in rh-manifest"
-        #git push origin HEAD:$BRANCH
+        PUSH_BRANCH=$(echo $BRANCH | awk -F '/' '{print $2}')
+        git push origin HEAD:$PUSH_BRANCH
         echo "Pushed new manifest for $PROJECT"
     else
         echo "No changes in $PROJECT"
@@ -78,7 +75,7 @@ do
     if [[ -z "$LINE" ]]; then
         return
     fi
-    # prepare_manifests $LINE
+    prepare_manifests $LINE
 
 done
 
@@ -91,4 +88,3 @@ do
 done
 
 echo "TEMPDIR: $TMP_DIR"
-rm -rf  $TMP_DIR
