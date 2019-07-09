@@ -35,24 +35,52 @@ function prepare_manifests() {
     git clone ssh://pkgs.devel.redhat.com/containers/$PROJECT
     cd $PROJECT
     git checkout -b retrodepbranch $BRANCH
-    mapfile < source-repos SOURCEREPOS
-    DS_REPO=$(echo $SOURCEREPOS | awk -F ' ' '{print $1}')
-    DS_HASH=$(echo $SOURCEREPOS | awk -F ' ' '{print $2}')
-    DS_PROJECT=$(echo $DS_REPO | awk -F '/' '{print $5}')
-    cd ../..
 
-    git clone $DS_REPO
-    cd $DS_PROJECT
-    git checkout -b retrodepbranch $DS_HASH
-    echo "Running retrodep"
-    $RETRODEP -importpath $US_REPO . > ../${PROJECT}_$MANIFETST_FILE
-    cd ..
-    rm -rf $DS_PROJECT
+    if test -f "source-repos"; then
+        echo "Checking out repo pointed by source-repos file"
+        mapfile < source-repos SOURCEREPOS
+        DS_REPO=$(echo $SOURCEREPOS | awk -F ' ' '{print $1}')
+        DS_HASH=$(echo $SOURCEREPOS | awk -F ' ' '{print $2}')
+        DS_PROJECT=$(echo $DS_REPO | awk -F '/' '{print $5}')
+        cd ../..
+
+        git clone $DS_REPO
+        cd $DS_PROJECT
+        git checkout -b retrodepbranch $DS_HASH
+        echo "Running retrodep"
+        $RETRODEP -importpath $US_REPO . > ../${PROJECT}_$MANIFETST_FILE
+        cd ..
+        rm -rf $DS_PROJECT
+
+    elif test -f "sources"; then
+        echo "Getting sources from src tar file"
+        rhpkg sources
+        TAR_FILE=$(find . -name *tar.gz)
+        mkdir tar
+        cp $TAR_FILE tar/
+        cd tar
+        tar -xvf $TAR_FILE
+        $RETRODEP -importpath $US_REPO . > ../../../${PROJECT}_$MANIFETST_FILE
+        cd ..
+        rm -rf tar
+        cd ../..
+    else
+        echo "NO SOURCES FOUND"
+    fi
+
+
 }
 
 function update_manifests() {
     PROJECT=$1
+
+    if [ ! -f ${PROJECT}_$MANIFETST_FILE ]; then
+        echo "No maniftest file generated for: $PROJECT"
+        return 1
+    fi
+
     cd distgit/$PROJECT
+
     cp ../../${PROJECT}_$MANIFETST_FILE $MANIFETST_FILE
     git status|grep "$MANIFETST_FILE"
     CHANGED=$?
@@ -87,4 +115,5 @@ do
     update_manifests $LINE
 done
 
-echo "TEMPDIR: $TMP_DIR"
+echo "Deleting tempdir: $TMP_DIR"
+rm -rf $TMP_DIR
