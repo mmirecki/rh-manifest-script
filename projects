@@ -6,3 +6,10 @@ ovs-cni-marker                   github.com/kubevirt/ovs-cni
 ovs-cni-plugin                   github.com/kubevirt/ovs-cni
 cluster-network-addons-operator  github.com/kubevirt/cluster-network-addons-operator
 hyperconverged-cluster-operator  github.com/kubevirt/hyperconverged-cluster-operator
+kubevirt-web-ui-operator         github.com/kubevirt/web-ui-operator
+kubevirt-cpu-model-nfd-plugin    github.com/kubevirt/cpu-nfd-plugin
+kubevirt-cpu-node-labeller       github.com/kubevirt/node-labeller
+kubevirt-metrics-collector       github.com/fromanirh/kubevirt-metrics-collector
+kubevirt-ssp-operator            github.com/MarSik/kubevirt-ssp-operator
+kubevirt-template-validator      github.com/fromanirh/kubevirt-template-validator
+
