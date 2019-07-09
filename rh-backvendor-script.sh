@@ -31,7 +31,7 @@ function prepare_manifests() {
     PROJECT=$1
     US_REPO=$2
     echo "Preparing manifest file for $PROJECT"
-    cd distgit
+    pushd distgit
     git clone ssh://pkgs.devel.redhat.com/containers/$PROJECT
     cd $PROJECT
     git checkout -b retrodepbranch $BRANCH
@@ -68,7 +68,7 @@ function prepare_manifests() {
         echo "NO SOURCES FOUND"
     fi
 
-
+    popd
 }
 
 function update_manifests() {
